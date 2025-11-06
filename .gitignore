@@ -1,0 +1,45 @@
+# Configuration files for IDEs and Operating Systems
+
+
+# Rider / IntelliJ IDEA configuration files
+.idea/
+
+#  Rider solution user options file
+*.suo
+*.user
+*.userprefs
+
+# JetBrains Rider-specific configuration
+*.sln.DotSettings.user
+*.sln.DotSettings
+
+# Visual Studio Code settings
+.vscode/
+
+
+
+# Build output directories
+[Bb]in/
+[Oo]bj/
+
+# NuGet packages directory
+[Pp]ackages/
+
+# Test results
+TestResults/
+.vs/
+
+# Symbol files
+*.pdb
+*.pidb
+*.vspdb
+*.nupkg
+
+
+# External Tools and Libraries
+
+# EPPlus temporary files
+*.xlsx.tmp
+
+# Log files
+*.log
