@@ -11,13 +11,12 @@ public class Client: IdentityUser
         
     public string Address { get; set; } = string.Empty;
 
-    // --- Helper Property (Not Mapped to DB) ---
-    /// Read-only calculated property for convenience (e.g., in Razor Pages UI).
-    /// This field is NOT stored in the database.
+   
+    /// Read-only calculated property for convenience 
  
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";
 
-    // Navigation property for Sales (1:N relationship)
+    // Navigation property for Sales 
     public ICollection<Sale> Sales { get; set; } = new List<Sale>();
 }
