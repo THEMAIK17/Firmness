@@ -14,14 +14,22 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 3. Register Identity (using the Client entity)
-builder.Services.AddDefaultIdentity<Client>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>() // Adds support for Roles (TASK 4)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
-
+// 3. Register Identity (using our Client entity AND configuring Identity services)
+builder.Services.AddIdentity<Client, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI(); // <-- This line is crucial for Razor Pages Fallback UI
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// This configures the Cookie settings (fixes redirection loops)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = $"/Identity/Account/Login";
+    options.LogoutPath = $"/Identity/Account/Logout";
+    options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+});
 
 var app = builder.Build();
 
