@@ -1,10 +1,39 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Panel";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row">
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Total de Productos</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.TotalProducts</h5>
+                <p class="card-text">Productos registrados.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total de Clientes</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.TotalClients</h5>
+                <p class="card-text">Clientes registrados (Usuarios).</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">Total de Ventas</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.TotalSales</h5>
+                <p class="card-text">Ventas procesadas.</p>
+            </div>
+        </div>
+    </div>
+    
 </div>
