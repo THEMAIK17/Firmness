@@ -11,18 +11,18 @@ public static class IdentitySeeder
         
         // Define the default admin user credentials
         private const string DefaultAdminEmail = "admin@firmeza.com";
-        private const string DefaultAdminPassword = "AdminPassword123*"; // Use a strong password
+        private const string DefaultAdminPassword = "AdminPassword123*"; 
 
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<Client>>();
 
-            // 1. Create Roles if they do not exist
+            //  Create Roles if they do not exist
             await EnsureRoleExists(roleManager, AdminRole);
             await EnsureRoleExists(roleManager, ClientRole);
 
-            // 2. Create the default Administrator user
+            //  Create the default Administrator user
             var adminUser = await userManager.FindByEmailAsync(DefaultAdminEmail);
             if (adminUser == null)
             {
