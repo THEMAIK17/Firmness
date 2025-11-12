@@ -1,0 +1,47 @@
+@page
+@model Firmness.Web.Pages.Clients.IndexModel
+@{
+    ViewData["Title"] = "Clients";
+}
+
+<h1>Client Management</h1>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search by name or document..." asp-for="SearchTerm" />
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+    </div>
+</form>
+
+<p>
+    <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Create New Client</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Document</th>
+        <th>Phone</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var client in Model.ClientList)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => client.FirstName)</td>
+            <td>@Html.DisplayFor(modelItem => client.LastName)</td>
+            <td>@Html.DisplayFor(modelItem => client.Email)</td>
+            <td>@Html.DisplayFor(modelItem => client.DocumentNumber)</td>
+            <td>@Html.DisplayFor(modelItem => client.PhoneNumber)</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@client.Id" class="btn btn-sm btn-secondary">Edit</a>
+                <a asp-page="./Delete" asp-route-id="@client.Id" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

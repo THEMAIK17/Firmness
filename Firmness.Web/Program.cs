@@ -6,15 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Get Connection String
+//  Get Connection String
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// 2. Register DbContext (using PostgreSQL)
+//  Register DbContext (using PostgreSQL)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 3. Register Identity (using our Client entity AND configuring Identity services)
+
+//  Register Identity (using our Client entity AND configuring Identity services)
 builder.Services.AddIdentity<Client, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()

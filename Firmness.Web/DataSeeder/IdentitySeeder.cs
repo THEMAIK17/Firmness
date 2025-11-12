@@ -1,6 +1,5 @@
 using Firmness.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-
 namespace Firmness.Web.DataSeeder;
 
 public static class IdentitySeeder

@@ -8,13 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using Firmness.Domain.Entities;
 using Firmness.Infraestructure.Data;
 
+
 namespace Firmness.Web.Pages.Products
 {
     public class DetailsModel : PageModel
     {
-        private readonly Firmness.Infraestructure.Data.ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public DetailsModel(Firmness.Infraestructure.Data.ApplicationDbContext context)
+        public DetailsModel(ApplicationDbContext context)
         {
             _context = context;
         }
