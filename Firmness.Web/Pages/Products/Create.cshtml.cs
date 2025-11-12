@@ -8,13 +8,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Firmness.Domain.Entities;
 using Firmness.Infraestructure.Data;
 
+
 namespace Firmness.Web.Pages.Products
 {
     public class CreateModel : PageModel
     {
-        private readonly Firmness.Infraestructure.Data.ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public CreateModel(Firmness.Infraestructure.Data.ApplicationDbContext context)
+        public CreateModel(ApplicationDbContext context)
         {
             _context = context;
         }

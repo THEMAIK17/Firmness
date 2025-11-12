@@ -12,9 +12,9 @@ namespace Firmness.Web.Pages.Products
 {
     public class DeleteModel : PageModel
     {
-        private readonly Firmness.Infraestructure.Data.ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public DeleteModel(Firmness.Infraestructure.Data.ApplicationDbContext context)
+        public DeleteModel(ApplicationDbContext context)
         {
             _context = context;
         }
