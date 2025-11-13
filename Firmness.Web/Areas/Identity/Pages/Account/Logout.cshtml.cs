@@ -28,6 +28,10 @@ namespace Firmness.Web.Areas.Identity.Pages.Account
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
+
+            // Add the Clear-Site-Data header to force the browser to clear all site data
+            Response.Headers.Add("Clear-Site-Data", "\"cache\", \"cookies\", \"storage\"");
+
             if (returnUrl != null)
             {
                 return LocalRedirect(returnUrl);
@@ -36,7 +40,7 @@ namespace Firmness.Web.Areas.Identity.Pages.Account
             {
                 // This needs to be a redirect so that the browser performs a new
                 // request and the identity for the user gets updated.
-                return RedirectToPage();
+                return LocalRedirect("~/");
             }
         }
     }

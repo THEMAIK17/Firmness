@@ -67,5 +67,16 @@
 <script src="~/js/site.js" asp-append-version="true"></script>
 
 @await RenderSectionAsync("Scripts", required: false)
+
+<script>
+    // Ensure the logout form is always submitted as a POST request
+    $(document).ready(function () {
+        $('#logoutForm').on('submit', function (e) {
+            e.preventDefault();
+            $(this).get(0).submit();
+        });
+    });
+</script>
+
 </body>
 </html>

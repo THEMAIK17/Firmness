@@ -1,4 +1,6 @@
 using Firmness.Domain.Entities;
+using Firmness.Web.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,6 +9,8 @@ using System.ComponentModel.DataAnnotations;
 namespace Firmness.Web.Pages.Clients
 {
     // This PageModel implements the Update logic for TASK 7
+    [NoCache]
+    [Authorize]
     public class EditModel : PageModel
     {
         private readonly UserManager<Client> _userManager;

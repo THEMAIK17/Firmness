@@ -1,5 +1,6 @@
 
 using Firmness.Infraestructure.Data;
+using Firmness.Web.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Firmness.Web.Pages
 {
     [Authorize(Roles = "Administrator")]
+    [NoCache]
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;

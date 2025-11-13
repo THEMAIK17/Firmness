@@ -2,16 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Firmness.Domain.Entities;
+using Firmness.Infraestructure.Data;
+using Firmness.Web.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Firmness.Domain.Entities;
-using Firmness.Infraestructure.Data;
-
 
 namespace Firmness.Web.Pages.Products
 {
+    [NoCache]
+    [Authorize]
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext _context;
