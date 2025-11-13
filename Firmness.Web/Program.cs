@@ -69,6 +69,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Add the authentication middleware to the pipeline
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();

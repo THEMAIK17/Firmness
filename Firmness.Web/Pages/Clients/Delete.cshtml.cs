@@ -1,11 +1,16 @@
 using Firmness.Domain.Entities; // Your Client entity
+using Firmness.Web.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 
 namespace Firmness.Web.Pages.Clients
 {
     // This PageModel implements the Delete logic for TASK 7
+    [NoCache]
+    [Authorize]
     public class DeleteModel : PageModel
     {
         private readonly UserManager<Client> _userManager;
