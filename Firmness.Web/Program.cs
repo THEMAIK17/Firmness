@@ -24,6 +24,8 @@ builder.Services.AddIdentity<Client, IdentityRole>(options => options.SignIn.Req
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+builder.Services.AddScoped<Firmness.Application.Services.IPdfService, Firmness.Application.Services.PdfService>();
+
 // This configures the Cookie settings (fixes redirection loops)
 builder.Services.ConfigureApplicationCookie(options =>
 {

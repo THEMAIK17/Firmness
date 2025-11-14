@@ -6,17 +6,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering; 
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using Firmness.Application.Services;
 
 namespace Firmness.Web.Pages.Sales
 {
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        // private readonly IPdfService _pdfService; 
-
-        public CreateModel(ApplicationDbContext context)
+        private readonly IPdfService _pdfService; 
+        private readonly IWebHostEnvironment _hostEnvironment;
+        
+        public CreateModel(ApplicationDbContext context, IPdfService pdfService, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
+            _pdfService = pdfService;
+            _hostEnvironment = hostEnvironment;
         }
 
         // --- Properties to populate the Form Dropdowns ---
@@ -128,6 +132,29 @@ namespace Firmness.Web.Pages.Sales
                 await _context.SaveChangesAsync();
                 
                 await transaction.CommitAsync();
+                
+                var saleForPdf = await _context.Sales
+                    .Include(s => s.Client) 
+                    .Include(s => s.SaleDetails) 
+                    .ThenInclude(sd => sd.Product) 
+                    .FirstOrDefaultAsync(s => s.Id == sale.Id);
+
+                if (saleForPdf != null)
+                {
+                   
+                    byte[] pdfBytes = await _pdfService.GenerateReceiptAsync(saleForPdf);
+                    
+                   
+                    string receiptsFolderPath = Path.Combine(_hostEnvironment.WebRootPath, "recibos");
+                    if (!Directory.Exists(receiptsFolderPath))
+                    {
+                        Directory.CreateDirectory(receiptsFolderPath);
+                    }
+                    string fileName = $"Receipt_Sale_{saleForPdf.Id}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+                    string filePath = Path.Combine(receiptsFolderPath, fileName);
+                    
+                    await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes);
+                }
                 
                 return RedirectToPage("/Index"); 
             }
