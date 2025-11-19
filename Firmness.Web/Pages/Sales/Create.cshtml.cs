@@ -150,7 +150,7 @@ namespace Firmness.Web.Pages.Sales
                     {
                         Directory.CreateDirectory(receiptsFolderPath);
                     }
-                    string fileName = $"Receipt_Sale_{saleForPdf.Id}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+                    string fileName = $"Receipt_Sale_{saleForPdf.Id}.pdf";
                     string filePath = Path.Combine(receiptsFolderPath, fileName);
                     
                     await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes);
