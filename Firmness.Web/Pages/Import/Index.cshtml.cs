@@ -39,7 +39,7 @@ namespace Firmness.Web.Pages.Import
                 return Page();
             }
 
-            //  Read the Excel file using the Application Service
+            // Read the Excel file using the Application Service
             List<ExcelDataRow> rawRows;
             using (var stream = Upload.OpenReadStream())
             {
@@ -60,7 +60,7 @@ namespace Firmness.Web.Pages.Import
             }
 
             //  Normalize and Process Data 
-            // I use a transaction to ensure data consistency.
+           
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -72,26 +72,40 @@ namespace Firmness.Web.Pages.Import
                 {
                     var firstRow = saleGroup.First();
 
-                    //  Find or Create Client 
+                    // Find or Create Client 
                     var client = await _context.Users.OfType<Client>()
                         .FirstOrDefaultAsync(c => c.DocumentNumber == firstRow.ClientDocument);
 
                     if (client == null)
                     {
+                        // 
+                        string? fName = firstRow.ClientName;
+                        string lName = "Unknown"; // Default fallback
+
+                        // Attempt to split the full name into First and Last name
+                        if (!string.IsNullOrWhiteSpace(firstRow.ClientName))
+                        {
+                            var parts = firstRow.ClientName.Trim().Split(' ', 2);
+                            if (parts.Length > 0) fName = parts[0]; 
+                            if (parts.Length > 1) lName = parts[1]; 
+                        }
+                        // -----------------------------
+
                         client = new Client
                         {
                             UserName = firstRow.ClientEmail ?? $"user{Guid.NewGuid()}", 
                             Email = firstRow.ClientEmail,
                             DocumentNumber = firstRow.ClientDocument,
-                            FirstName = firstRow.ClientName, 
-                            LastName = ".", 
+                            FirstName = fName, 
+                            LastName = lName,  
                             Address = firstRow.ClientAddress ?? "",
                             PhoneNumber = firstRow.ClientPhone,
                             EmailConfirmed = true 
                         };
                         
+                       
                         _context.Users.Add(client);
-                        await _context.SaveChangesAsync(); 
+                        await _context.SaveChangesAsync();
                     }
 
                     //  Create Sale Header
@@ -105,7 +119,7 @@ namespace Firmness.Web.Pages.Import
                     _context.Sales.Add(sale);
                     await _context.SaveChangesAsync(); 
 
-                    
+                    //  Process Sale Details 
                     decimal totalSale = 0;
                     foreach (var item in saleGroup)
                     {
@@ -120,7 +134,7 @@ namespace Firmness.Web.Pages.Import
                                 Name = item.ProductName,
                                 Description = item.ProductDescription ?? item.ProductName,
                                 UnitPrice = item.UnitPrice,
-                                Stock = 100 // Default stock for imported items
+                                Stock = 100 
                             };
                             _context.Products.Add(product);
                             await _context.SaveChangesAsync();
