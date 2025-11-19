@@ -21,7 +21,7 @@ public static class IdentitySeeder
             await EnsureRoleExists(roleManager, AdminRole);
             await EnsureRoleExists(roleManager, ClientRole);
 
-            //  Create the default Administrator user
+           
             var adminUser = await userManager.FindByEmailAsync(DefaultAdminEmail);
             if (adminUser == null)
             {
@@ -38,7 +38,6 @@ public static class IdentitySeeder
                 var result = await userManager.CreateAsync(adminUser, DefaultAdminPassword);
                 if (result.Succeeded)
                 {
-                    // Assign the Administrator role to the new user
                     await userManager.AddToRoleAsync(adminUser, AdminRole);
                 }
             }

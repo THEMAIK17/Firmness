@@ -1,0 +1,63 @@
+@page
+@model Firmness.Web.Pages.Import.IndexModel
+@{
+    ViewData["Title"] = "Import Data";
+}
+
+<h1>Massive Data Import (Excel)</h1>
+
+@if (Model.Messages.Any())
+{
+    <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">Process Result</h4>
+        <ul>
+            @foreach (var msg in Model.Messages)
+            {
+                <li>@msg</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Upload File
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="fileUpload" class="form-label">Select Excel File (.xlsx)</label>
+                        <input type="file" class="form-control" id="fileUpload" asp-for="Upload" accept=".xlsx">
+                    </div>
+                    <button type="submit" class="btn btn-success">Upload and Process</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Instructions
+            </div>
+            <div class="card-body">
+                <p>The Excel file must have the following columns (in order):</p>
+                <ol class="small">
+                    <li>Invoice Number (Int)</li>
+                    <li>Date (Date)</li>
+                    <li>Client Document (String)</li>
+                    <li>Client Name (String)</li>
+                    <li>Client Email (String)</li>
+                    <li>Client Address (String)</li>
+                    <li>Client Phone (String)</li>
+                    <li>Product Name (String)</li>
+                    <li>Product Description (String)</li>
+                    <li>Unit Price (Decimal)</li>
+                    <li>Quantity (Int)</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>

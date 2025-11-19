@@ -19,14 +19,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<Client, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
-    .AddDefaultUI(); // <-- This line is crucial for Razor Pages Fallback UI
+    .AddDefaultUI(); 
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<Firmness.Application.Services.IPdfService, Firmness.Application.Services.PdfService>();
 
-// This configures the Cookie settings (fixes redirection loops)
+builder.Services.AddScoped<Firmness.Application.Services.IExcelService, Firmness.Application.Services.ExcelService>();
+
+
+// This configures the Cookie settings 
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = $"/Identity/Account/Login";
