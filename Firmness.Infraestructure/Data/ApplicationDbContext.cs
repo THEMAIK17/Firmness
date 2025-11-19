@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Firmness.Infraestructure.Data;
 
 
-// Inherits from IdentityDbContext using our custom Client entity
 
 public class ApplicationDbContext : IdentityDbContext<Client>
 {
