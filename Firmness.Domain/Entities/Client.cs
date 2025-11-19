@@ -5,8 +5,8 @@ namespace Firmness.Domain.Entities;
 
 public class Client: IdentityUser
 {
-    public string DocumentNumber { get; set; } = string.Empty; 
-    public string FirstName { get; set; } = string.Empty;
+    public string? DocumentNumber { get; set; } = string.Empty; 
+    public string? FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
         
     public string Address { get; set; } = string.Empty;
