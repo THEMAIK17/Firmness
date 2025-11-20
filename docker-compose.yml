@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # service for the database
+  db:
+    image: postgres:15-alpine
+    container_name: firmness_db
+    restart: always
+    environment:
+      - POSTGRES_DB=FirmnessDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Password123!  
+    ports:
+      - "5433:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  #  Service for the web application
+  web:
+    container_name: firmness_web
+    build:
+      context: .
+      dockerfile: Firmness.Web/Dockerfile
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=FirmnessDB;Username=postgres;Password=Password123!
+    ports:
+      - "8080:8080" # I can ingress to the app  http://localhost:8080
+    depends_on:
+      - db
+
+
+volumes:
+  postgres_data:
