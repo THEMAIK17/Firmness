@@ -1,7 +1,0 @@
-﻿services:
-  firmness.web:
-    image: firmness.web
-    build:
-      context: .
-      dockerfile: Firmness.Web/Dockerfile
-
