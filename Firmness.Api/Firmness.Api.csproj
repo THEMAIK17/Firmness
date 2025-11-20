@@ -15,6 +15,13 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.22" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.21">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
     </ItemGroup>
@@ -23,6 +30,10 @@
       <ProjectReference Include="..\Firmness.Application\Firmness.Application.csproj" />
       <ProjectReference Include="..\Firmness.Domain\Firmness.Domain.csproj" />
       <ProjectReference Include="..\Firmness.Infraestructure\Firmness.Infraestructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="DTOs\" />
     </ItemGroup>
 
 </Project>
