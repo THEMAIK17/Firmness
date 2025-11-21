@@ -1,5 +1,6 @@
 using AutoMapper;
 using Firmness.Api.DTOs.Clients;
+using Firmness.Application.Services.Email;
 using Firmness.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,11 +16,18 @@ public class ClientsController : ControllerBase
 {
     private readonly UserManager<Client> _userManager;
     private readonly IMapper _mapper;
-
-    public ClientsController(UserManager<Client> userManager, IMapper mapper)
+    private readonly IEmailService _emailService;
+    private readonly ILogger<ClientsController> _logger;
+    
+    public ClientsController(
+        UserManager<Client> userManager, 
+        IMapper mapper,
+        IEmailService emailService, ILogger<ClientsController> logger)
     {
         _userManager = userManager;
         _mapper = mapper;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     // GET: api/Clients
@@ -35,22 +43,41 @@ public class ClientsController : ControllerBase
         return Ok(dtos);
     }
         
-    // POST: api/Clients 
+    // POST: api/Clients
     [HttpPost]
     public async Task<ActionResult<ClientDto>> CreateClient(CreateClientDto createDto)
     {
         var user = _mapper.Map<Client>(createDto);
-            
-       
         var result = await _userManager.CreateAsync(user, createDto.Password);
 
         if (!result.Succeeded)
         {
             return BadRequest(result.Errors);
         }
-        
+
         await _userManager.AddToRoleAsync(user, "Client");
         
+        //create the email message
+        try 
+        {
+            string subject = "¡Bienvenido a Firmeza!";
+            string body = $@"
+                    <h1>Hola {user.FirstName},</h1>
+                    <p>Tu cuenta ha sido creada exitosamente en nuestra plataforma.</p>
+                    <p>Tus credenciales de acceso son:</p>
+                    <ul>
+                        <li><b>Usuario:</b> {user.Email}</li>
+                        <li><b>Contraseña:</b> (La que definiste)</li>
+                    </ul>
+                    <p>Atentamente,<br>El equipo de Firmeza.</p>";
+            
+            await _emailService.SendEmailAsync(user.Email!, subject, body);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error enviando correo de bienvenida al usuario {Email}", user.Email);
+        }
+
         var returnDto = _mapper.Map<ClientDto>(user);
         return CreatedAtAction(nameof(GetClients), new { id = user.Id }, returnDto);
     }

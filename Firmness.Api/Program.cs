@@ -1,6 +1,8 @@
 using System.Text;
 using Firmness.Application.Auth;
 using Firmness.Application.Services.Auth;
+using Firmness.Application.Services.Email;
+using Firmness.Application.Settings;
 using Firmness.Domain.Entities;
 using Firmness.Infraestructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -93,6 +95,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddAutoMapper(typeof(Program));
+// Configure the email settings
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Register the email 
+builder.Services.AddScoped<IEmailService, GmailEmailService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
