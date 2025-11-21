@@ -1,6 +1,7 @@
 using AutoMapper;
 using Firmness.Api.DTOs.Clients;
 using Firmness.Api.DTOs.Products;
+using Firmness.Api.DTOs.Sales;
 using Firmness.Domain.Entities;
 
 namespace Firmness.Api.Mappings;
@@ -26,6 +27,16 @@ public class MappingProfile : Profile
 
         // DTO to Entity Mapping (Input)
         CreateMap<UpdateClientDto, Client>();
+        
+        //  Entity to Dto Mapping (Output)
+        CreateMap<Sale, SaleDto>()
+            .ForMember(dest => dest.ClientName, opt => opt.MapFrom(src => src.Client.FullName)); 
+
+        CreateMap<SaleDetail, SaleDetailDto>()
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
+
+        // Dto to Entity Mapping (Input)
+        CreateMap<CreateSaleDto, Sale>();
         
     }
 }
