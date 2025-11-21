@@ -32,8 +32,4 @@
       <ProjectReference Include="..\Firmness.Infraestructure\Firmness.Infraestructure.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="DTOs\" />
-    </ItemGroup>
-
 </Project>
