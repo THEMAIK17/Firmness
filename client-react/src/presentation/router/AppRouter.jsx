@@ -5,6 +5,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { CatalogPage } from '../pages/CatalogPage';
 import { CartPage } from '../pages/CartPage';
+import { CheckoutPage } from '../pages/CheckoutPage';
 
 // Component to protect private routes
 const PrivateRoute = ({ children }) => {
@@ -28,6 +29,12 @@ export const AppRouter = () => {
                 <PrivateRoute>
                     <CartPage />
                 </PrivateRoute>
+            } />
+
+            <Route path="/checkout" element={
+            <PrivateRoute>
+            <CheckoutPage />
+            </PrivateRoute>
             } />
             <Route path="/*" element={
                 <PrivateRoute>
