@@ -1,4 +1,4 @@
-import { api } from '../api/axiosConfig.js';
+import  api  from '../api/axiosConfig.js';
 
 export const authRepository = {
     // function to log in
