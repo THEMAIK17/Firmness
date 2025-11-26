@@ -1,5 +1,5 @@
 
-import { api } from '../api/axiosConfig.js';
+import  api  from '../api/axiosConfig.js';
 
 export const productRepository = {
     
