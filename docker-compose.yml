@@ -1,5 +1,10 @@
 
 services:
+  tests:
+    container_name: firmness_tests
+    build:
+      context: .
+      dockerfile: Firmness.Tests/Dockerfile
   # service for the database
   db:
     image: postgres:15-alpine
@@ -28,7 +33,10 @@ services:
     ports:
       - "8080:8080" # I can ingress to the app  http://localhost:8080
     depends_on:
-      - db
+      db:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
     # the service for the Api
   api:
     container_name: firmness_api
@@ -50,7 +58,10 @@ services:
     ports:
       - "5143:8080" 
     depends_on:
-      - db
+      db:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
   # This runs the React application using Nginx.
   client:
     container_name: firmness_client
@@ -61,7 +72,10 @@ services:
     ports:
       - "5173:80" # Access the React app at http://localhost:5173
     depends_on:
-      - api
+      api:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
   # this container is use for shared urls
   print-urls:
     image: alpine:latest
@@ -73,7 +87,7 @@ services:
     command: >
       sh -c "sleep 5; 
              echo '----------------------------------------------------------';
-             echo ' PROYECTO FIRMEZA - DESPLIEGUE EXITOSO  🚀';
+             echo ' PROYECTO FIRMEZA - DESPLIEGUE EXITOSO  ';
              echo '----------------------------------------------------------';
              echo ' ';
              echo ' TIENDA (Cliente):    http://localhost:5173';
