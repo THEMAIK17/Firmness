@@ -45,6 +45,7 @@ public class ClientsController : ControllerBase
         
     // POST: api/Clients
     [HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult<ClientDto>> CreateClient(CreateClientDto createDto)
     {
         var user = _mapper.Map<Client>(createDto);

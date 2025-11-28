@@ -14,9 +14,8 @@ public class GmailEmailService : IEmailService
         _settings = settings.Value;
     }
 
-    public async Task SendEmailAsync(string toEmail, string subject, string messageBody)
+    public async Task SendEmailAsync(string toEmail, string subject, string messageBody, byte[]? attachmentData = null, string? attachmentName = null)
     {
-        // configure the smtp client 
         var smtpClient = new SmtpClient(_settings.Host)
         {
             Port = _settings.Port,
@@ -24,10 +23,8 @@ public class GmailEmailService : IEmailService
             EnableSsl = true,
         };
 
-        // create the message
-        var mailMessage = new MailMessage
+        using var mailMessage = new MailMessage
         {
-            
             From = new MailAddress(_settings.From, "Firmeza Notifications"),
             Subject = subject,
             Body = messageBody,
@@ -35,8 +32,19 @@ public class GmailEmailService : IEmailService
         };
 
         mailMessage.To.Add(toEmail);
-
-        //send the message
-        await smtpClient.SendMailAsync(mailMessage);
+        
+        if (attachmentData != null && !string.IsNullOrEmpty(attachmentName))
+        {
+            
+            using var ms = new MemoryStream(attachmentData);
+            
+            mailMessage.Attachments.Add(new Attachment(ms, attachmentName, "application/pdf"));
+            
+            await smtpClient.SendMailAsync(mailMessage);
+        }
+        else 
+        {
+            await smtpClient.SendMailAsync(mailMessage);
+        }
     }
 }

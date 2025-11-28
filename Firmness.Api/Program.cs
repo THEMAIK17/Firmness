@@ -1,5 +1,6 @@
 using System.Text;
 using Firmness.Application.Auth;
+using Firmness.Application.Services;
 using Firmness.Application.Services.Auth;
 using Firmness.Application.Services.Email;
 using Firmness.Application.Settings;
@@ -60,7 +61,7 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 // Configure swagger for Jwt
 builder.Services.AddSwaggerGen(c =>
@@ -100,7 +101,43 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 
 // Register the email 
 builder.Services.AddScoped<IEmailService, GmailEmailService>();
+
+// Register the PDF service
+builder.Services.AddScoped<IPdfService, PdfService>();
+
+//Allow the React Frontend to connect
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.AllowAnyOrigin()  
+            .AllowAnyHeader()  
+            .AllowAnyMethod();
+    });
+});
 var app = builder.Build();
+
+// This block ensures the DB is created and populated when Docker starts
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var userManager = services.GetRequiredService<UserManager<Client>>();
+        
+        await context.Database.MigrateAsync();
+        
+        await Firmness.Infraestructure.Data.StoreSeeder.SeedAsync(context, userManager);
+        
+        Console.WriteLine("--> Database migration and seeding completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred during database migration or seeding.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -112,6 +149,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+// Activate CORS policy
+app.UseCors("AllowReactApp");
 
 // Add the authentication middleware to the pipeline
 app.UseAuthentication();

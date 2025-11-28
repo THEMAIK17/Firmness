@@ -15,8 +15,7 @@ namespace Firmness.Api.Controllers;
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper; // dependency new
-
-        // Inyectamos Mapper además del Contexto
+        
         public ProductsController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;

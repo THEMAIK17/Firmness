@@ -1,10 +1,12 @@
 using AutoMapper;
 using Firmness.Api.DTOs.Sales;
+using Firmness.Application.Services;
 using Firmness.Domain.Entities;
 using Firmness.Infraestructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Firmness.Application.Services.Email;
 
 namespace Firmness.Api.Controllers;
 
@@ -15,11 +17,15 @@ namespace Firmness.Api.Controllers;
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService; 
+        private readonly IPdfService _pdfService;     // Service of the PDF
 
-        public SalesController(ApplicationDbContext context, IMapper mapper)
+        public SalesController(ApplicationDbContext context, IMapper mapper, IEmailService emailService, IPdfService pdfService)
         {
             _context = context;
             _mapper = mapper;
+            _emailService = emailService;
+            _pdfService = pdfService;
         }
 
         // GET: api/Sales
@@ -107,9 +113,37 @@ namespace Firmness.Api.Controllers;
                 _context.Sales.Add(sale);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+                
+                // generate pdf
+                var saleForPdf = await _context.Sales
+                    .Include(s => s.Client)
+                    .Include(s => s.SaleDetails).ThenInclude(sd => sd.Product)
+                    .FirstAsync(s => s.Id == sale.Id);
+                
+                var pdfBytes = await _pdfService.GenerateReceiptAsync(saleForPdf);
 
                 
-                
+                string emailBody = $@"
+                <h1>¡Gracias por tu compra!</h1>
+                <p>Adjunto encontrarás el recibo de tu compra #{sale.Id}.</p>
+                <p><strong>Total:</strong> ${sale.TotalAmount:N2}</p>";
+
+              
+                try 
+                {
+                    await _emailService.SendEmailAsync(
+                        saleForPdf.Client.Email!, 
+                        $"Recibo de Compra #{sale.Id}", 
+                        emailBody,
+                        pdfBytes,                      
+                        $"Recibo_{sale.Id}.pdf"       
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error enviando correo: {ex.Message}");
+                    
+                }
                 return CreatedAtAction("GetSale", new { id = sale.Id }, new { id = sale.Id, message = "Sale created successfully" });
             }
             catch (Exception ex)

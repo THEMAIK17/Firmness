@@ -37,6 +37,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
+
 var app = builder.Build();
 
 // --- Execute Seeder to Apply Migrations and Create Roles ---
@@ -48,10 +49,8 @@ using (var scope = app.Services.CreateScope())
         //  Apply the migration (This creates the DB if it doesn't exist)
         var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
         
-        // Ensure the database is created 
         await context.Database.MigrateAsync(); 
         
-        //  Seed the Roles and Admin User (TASK 4)
         await IdentitySeeder.SeedAsync(serviceProvider);
     }
     catch (Exception ex)
