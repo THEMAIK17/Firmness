@@ -11,7 +11,9 @@ import { CheckoutPage } from '../pages/CheckoutPage';
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
 
-    if (loading) return <div>Cargando...</div>;
+   if (loading) {
+        return <div className="d-flex justify-content-center mt-5">Cargando...</div>;
+    }
     
     return isAuthenticated ? children : <Navigate to="/login" />;
 };

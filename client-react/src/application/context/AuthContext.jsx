@@ -11,22 +11,35 @@ export const AuthProvider = ({ children }) => {
 
     // 1. Check session persistence on app load
     useEffect(() => {
+        console.log("1. Iniciando chequeo de sesión..."); // <--- LOG 1
         const checkAuth = () => {
             const token = localStorage.getItem('token');
+            console.log("2. Token encontrado en Storage:", token); // <--- LOG 2
+
             if (token) {
                 try {
                     const decoded = jwtDecode(token);
-                    // Check if token is expired
-                    if (decoded.exp * 1000 < Date.now()) {
+                    console.log("3. Token decodificado:", decoded); // <--- LOG 3
+                    
+                   
+                    const expirationTime = decoded.exp * 1000;
+                    const currentTime = Date.now();
+                    console.log(`4. Expiración: ${expirationTime} vs Ahora: ${currentTime}`); // <--- LOG 4
+
+                    if (expirationTime < currentTime - 300000) { 
+                        console.log("Token expirado hace mucho. Cerrando sesión.");
                         logout();
                     } else {
+                        console.log("6. Token válido. Restaurando sesión."); // <--- LOG 6
                         setUser({ ...decoded, token });
                         setIsAuthenticated(true);
                     }
                 } catch (error) {
-                    console.error("Token inválido", error);
+                    console.error("7. Error al decodificar token:", error); // <--- LOG 7
                     logout();
                 }
+            } else {
+                console.log("8. No hay token. Usuario anónimo."); // <--- LOG 8
             }
             setLoading(false);
         };
