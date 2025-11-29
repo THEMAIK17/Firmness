@@ -19,13 +19,15 @@ namespace Firmness.Api.Controllers;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService; 
         private readonly IPdfService _pdfService;     // Service of the PDF
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public SalesController(ApplicationDbContext context, IMapper mapper, IEmailService emailService, IPdfService pdfService)
+        public SalesController(ApplicationDbContext context, IMapper mapper, IEmailService emailService, IPdfService pdfService, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
             _mapper = mapper;
             _emailService = emailService;
             _pdfService = pdfService;
+            _hostEnvironment = hostEnvironment;
         }
 
         // GET: api/Sales
@@ -121,7 +123,24 @@ namespace Firmness.Api.Controllers;
                     .FirstAsync(s => s.Id == sale.Id);
                 
                 var pdfBytes = await _pdfService.GenerateReceiptAsync(saleForPdf);
+                string fileName = $"Receipt_Sale_{sale.Id}.pdf";
 
+                // this is use for save the PDF en wwwroot
+                try 
+                {
+                    string webRootPath = _hostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    string receiptsPath = Path.Combine(webRootPath, "recibos");
+
+                    if (!Directory.Exists(receiptsPath)) Directory.CreateDirectory(receiptsPath);
+                    
+                    string fullPath = Path.Combine(receiptsPath, fileName);
+                    await System.IO.File.WriteAllBytesAsync(fullPath, pdfBytes);
+                    Console.WriteLine($"PDF guardado en: {fullPath}");
+                }
+                catch (Exception ioEx)
+                {
+                    Console.WriteLine($"Error guardando archivo físico: {ioEx.Message}");
+                }
                 
                 string emailBody = $@"
                 <h1>¡Gracias por tu compra!</h1>
@@ -144,7 +163,8 @@ namespace Firmness.Api.Controllers;
                     Console.WriteLine($"Error enviando correo: {ex.Message}");
                     
                 }
-                return CreatedAtAction("GetSale", new { id = sale.Id }, new { id = sale.Id, message = "Sale created successfully" });
+                var saleDto = _mapper.Map<SaleDto>(saleForPdf);
+                return CreatedAtAction(nameof(GetSale), new { id = sale.Id }, saleDto);
             }
             catch (Exception ex)
             {

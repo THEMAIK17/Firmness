@@ -6,7 +6,17 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
+# dependencies for the pdf
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       libfontconfig1 \
+       libfreetype6 \
+       libxml2 \
+    && rm -rf /var/lib/apt/lists/*
+USER $APP_UID
+    
+USER $APP_UID
 # This stage uses the full .NET SDK to build the application.
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release

@@ -4,7 +4,16 @@ USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 
-
+# dependencies for the pdf
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       libfontconfig1 \
+       libfreetype6 \
+       libxml2 \
+    && rm -rf /var/lib/apt/lists/* \
+    
+USER $APP_UID
 USER root
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

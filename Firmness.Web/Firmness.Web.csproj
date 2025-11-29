@@ -37,6 +37,7 @@
 
     <ItemGroup>
       <Folder Include="Pages\Products\" />
+      <Folder Include="wwwroot\recibos\" />
     </ItemGroup>
 
 </Project>
