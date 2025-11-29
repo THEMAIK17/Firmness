@@ -32,6 +32,8 @@ services:
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=FirmnessDB;Username=postgres;Password=${POSTGRES_PASSWORD}
     ports:
       - "8080:8080" # I can ingress to the app  http://localhost:8080
+    volumes:
+      - ./Firmness.Web/wwwroot/recibos:/app/wwwroot/recibos
     depends_on:
       db:
         condition: service_started
@@ -56,7 +58,9 @@ services:
       - EmailSettings__From=${EMAIL_FROM}
       - EmailSettings__Password=${EMAIL_PASSWORD}
     ports:
-      - "5143:8080" 
+      - "5143:8080"
+    volumes:
+      - ./Firmness.Web/wwwroot/recibos:/app/wwwroot/recibos
     depends_on:
       db:
         condition: service_started
@@ -100,5 +104,6 @@ services:
              echo '----------------------------------------------------------';"
 volumes:
   postgres_data:
+  
   
  

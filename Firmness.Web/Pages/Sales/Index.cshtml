@@ -35,8 +35,8 @@
                     var pdfName = $"Receipt_Sale_{item.Id}_*.pdf";
                 }
                     
-                <a href="~/recibos/Receipt_Sale_@(item.Id).pdf" target="_blank" class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-file-pdf"></i> Ver PDF
+                <a asp-page-handler="DownloadPdf" asp-route-id="@item.Id" target="_blank" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-file-pdf"></i> Descargar PDF
                 </a>
             </td>
         </tr>

@@ -1,9 +1,8 @@
-
 using Firmness.Domain.Entities;
 using Firmness.Infraestructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering; 
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using Firmness.Application.Services;
@@ -13,9 +12,9 @@ namespace Firmness.Web.Pages.Sales
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly IPdfService _pdfService; 
+        private readonly IPdfService _pdfService;
         private readonly IWebHostEnvironment _hostEnvironment;
-        
+
         public CreateModel(ApplicationDbContext context, IPdfService pdfService, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
@@ -26,19 +25,16 @@ namespace Firmness.Web.Pages.Sales
         // --- Properties to populate the Form Dropdowns ---
         public SelectList ClientList { get; set; } = default!;
         public SelectList ProductList { get; set; } = default!;
-        
+
         // I will store the JSON representation of product prices for JavaScript
         public string ProductPricesJson { get; set; } = "{}";
 
-       
-        [BindProperty]
-        public InputModel Input { get; set; } = new InputModel();
-        
+
+        [BindProperty] public InputModel Input { get; set; } = new InputModel();
+
         public class InputModel
         {
-            [Required]
-            [Display(Name = "Client")]
-            public string ClientId { get; set; } = string.Empty;
+            [Required] [Display(Name = "Client")] public string ClientId { get; set; } = string.Empty;
 
             // This will capture the list of products added via JavaScript
             public List<SaleDetailInput> Items { get; set; } = new List<SaleDetailInput>();
@@ -46,13 +42,13 @@ namespace Firmness.Web.Pages.Sales
 
         public class SaleDetailInput
         {
-            [Required]
-            public int ProductId { get; set; }
+            [Required] public int ProductId { get; set; }
+
             [Required]
             [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
             public int Quantity { get; set; }
-            [Required]
-            public decimal UnitPrice { get; set; } 
+
+            [Required] public decimal UnitPrice { get; set; }
             public string ProductName { get; set; } = string.Empty;
         }
 
@@ -61,15 +57,15 @@ namespace Firmness.Web.Pages.Sales
         {
             // Load Clients (Users) for the dropdown
             ClientList = new SelectList(await _context.Users.ToListAsync(), "Id", "FullName");
-            
+
             // Load Products with stock for the dropdown
             var availableProducts = await _context.Products
                 .Where(p => p.Stock > 0)
                 .Select(p => new { p.Id, p.Name, p.UnitPrice })
                 .ToListAsync();
-                
+
             ProductList = new SelectList(availableProducts, "Id", "Name");
-            
+
             // Create a dictionary for JS to know the prices
             var productPrices = availableProducts.ToDictionary(p => p.Id, p => p.UnitPrice);
             ProductPricesJson = System.Text.Json.JsonSerializer.Serialize(productPrices);
@@ -80,26 +76,27 @@ namespace Firmness.Web.Pages.Sales
         {
             if (!ModelState.IsValid || Input.Items.Count == 0)
             {
-                await OnGetAsync(); 
+                await OnGetAsync();
                 if (Input.Items.Count == 0)
                     ModelState.AddModelError(string.Empty, "You must add at least one product to the sale.");
                 return Page();
             }
-            
-            // This ensures that the Sale AND SaleDetails are saved, or neither are.
+
+            // Flag to control transaction state
+            bool transactionCommitted = false;
+
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                //  Create the master Sale entity
+                // 1. Create Sale Logic (Database)
                 var sale = new Sale
                 {
                     ClientId = Input.ClientId,
                     SaleDate = DateTime.UtcNow,
-                    TaxAmount = 0, // We calculate this next
-                    TotalAmount = 0 // We calculate this next
+                    TaxAmount = 0,
+                    TotalAmount = 0
                 };
 
-                //  Create SaleDetails from the input and calculate totals
                 decimal total = 0;
                 foreach (var item in Input.Items)
                 {
@@ -109,61 +106,76 @@ namespace Firmness.Web.Pages.Sales
                         throw new Exception($"Product '{item.ProductName}' is out of stock or does not exist.");
                     }
 
-                    // Reduce stock
                     product.Stock -= item.Quantity;
 
                     var saleDetail = new SaleDetail
                     {
-                        Sale = sale, 
+                        Sale = sale,
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
                         UnitPriceAtSale = item.UnitPrice
                     };
-                    
+
                     total += (item.UnitPrice * item.Quantity);
                     _context.SaleDetails.Add(saleDetail);
                 }
 
-                //  Set totals (Assuming 19% IVA for example, adjust as needed)
                 sale.TaxAmount = total * 0.19m;
                 sale.TotalAmount = total + sale.TaxAmount;
                 _context.Sales.Add(sale);
-               
-                await _context.SaveChangesAsync();
-                
-                await transaction.CommitAsync();
-                
-                var saleForPdf = await _context.Sales
-                    .Include(s => s.Client) 
-                    .Include(s => s.SaleDetails) 
-                    .ThenInclude(sd => sd.Product) 
-                    .FirstOrDefaultAsync(s => s.Id == sale.Id);
 
-                if (saleForPdf != null)
+                await _context.SaveChangesAsync();
+
+                // 2. COMMIT TRANSACTION
+                await transaction.CommitAsync();
+                transactionCommitted = true; // <--- IMPORTANT: Mark as committed!
+
+                // 3. Generate PDF (Post-processing logic)
+                // We wrap this in its own try-catch so PDF failures don't crash the request
+                try
                 {
-                   
-                    byte[] pdfBytes = await _pdfService.GenerateReceiptAsync(saleForPdf);
-                    
-                   
-                    string receiptsFolderPath = Path.Combine(_hostEnvironment.WebRootPath, "recibos");
-                    if (!Directory.Exists(receiptsFolderPath))
+                    var saleForPdf = await _context.Sales
+                        .Include(s => s.Client)
+                        .Include(s => s.SaleDetails).ThenInclude(sd => sd.Product)
+                        .FirstOrDefaultAsync(s => s.Id == sale.Id);
+
+                    if (saleForPdf != null)
                     {
-                        Directory.CreateDirectory(receiptsFolderPath);
+                        byte[] pdfBytes = await _pdfService.GenerateReceiptAsync(saleForPdf);
+
+                        string webRootPath = _hostEnvironment.WebRootPath ??
+                                             Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                        string receiptsFolderPath = Path.Combine(webRootPath, "recibos");
+
+                        if (!Directory.Exists(receiptsFolderPath))
+                        {
+                            Directory.CreateDirectory(receiptsFolderPath);
+                        }
+
+                        string fileName = $"Receipt_Sale_{saleForPdf.Id}.pdf";
+                        string filePath = Path.Combine(receiptsFolderPath, fileName);
+
+                        await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes);
                     }
-                    string fileName = $"Receipt_Sale_{saleForPdf.Id}.pdf";
-                    string filePath = Path.Combine(receiptsFolderPath, fileName);
-                    
-                    await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes);
                 }
-                
-                return RedirectToPage("/Index"); 
+                catch (Exception pdfEx)
+                {
+                    // If PDF fails, just log it. DO NOT re-throw, or it will trigger the outer catch.
+                    Console.WriteLine($"Error generating PDF: {pdfEx.Message}");
+                }
+
+                return RedirectToPage("/Index");
             }
             catch (Exception ex)
             {
-                // If anything fails, roll back the entire transaction
-                await transaction.RollbackAsync();
-                await OnGetAsync(); 
-                ModelState.AddModelError(string.Empty, $"Error creating sale: {ex.Message}");
+                // 4. SAFETY CHECK: Only rollback if we haven't committed yet
+                if (!transactionCommitted)
+                {
+                    await transaction.RollbackAsync();
+                }
+
+                await OnGetAsync();
+                ModelState.AddModelError(string.Empty, $"Error processing sale: {ex.Message}");
                 return Page();
             }
         }
