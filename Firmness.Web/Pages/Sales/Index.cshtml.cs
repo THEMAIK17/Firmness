@@ -13,7 +13,7 @@ namespace Firmness.Web.Pages.Sales
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly IPdfService _pdfService;         // <-- NUEVO
+        private readonly IPdfService _pdfService;         
         private readonly IWebHostEnvironment _hostEnvironment;
 
         public IndexModel(ApplicationDbContext context, IPdfService pdfService, IWebHostEnvironment hostEnvironment)
@@ -35,33 +35,40 @@ namespace Firmness.Web.Pages.Sales
         // On-Demand PDF Generation
         public async Task<IActionResult> OnGetDownloadPdfAsync(int id)
         {
-          
             string webRootPath = _hostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string receiptsPath = Path.Combine(webRootPath, "recibos");
             string fileName = $"Receipt_Sale_{id}.pdf";
             string filePath = Path.Combine(receiptsPath, fileName);
 
-          
-            if (!System.IO.File.Exists(filePath))
+            byte[] pdfBytes; 
+
+            if (System.IO.File.Exists(filePath))
             {
-            
+                pdfBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            }
+            else
+            {
                 var sale = await _context.Sales
                     .Include(s => s.Client)
                     .Include(s => s.SaleDetails).ThenInclude(sd => sd.Product)
                     .FirstOrDefaultAsync(s => s.Id == id);
 
                 if (sale == null) return NotFound();
-
-                var pdfBytes = await _pdfService.GenerateReceiptAsync(sale);
-
-          
-                if (!Directory.Exists(receiptsPath)) Directory.CreateDirectory(receiptsPath);
                 
-                await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes);
+                pdfBytes = await _pdfService.GenerateReceiptAsync(sale);
+                
+                try
+                {
+                    if (!Directory.Exists(receiptsPath)) Directory.CreateDirectory(receiptsPath);
+                    await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($" Alerta: No se pudo guardar el archivo físico (posible error de permisos), pero se enviará al usuario. Error: {ex.Message}");
+                }
+                // -----------------------------------------------------
             }
-            
-            byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-            return File(fileBytes, "application/pdf", fileName);
+            return File(pdfBytes, "application/pdf", fileName);
         }
     }
 }
