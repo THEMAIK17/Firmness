@@ -1,0 +1,167 @@
+@page
+@model Firmness.Web.Pages.Sales.CreateModel
+@{
+    ViewData["Title"] = "Create New Sale";
+}
+
+<h1>Create New Sale</h1>
+
+<form method="post" id="saleForm">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="Input.ClientId" class="form-label"></label>
+                <select asp-for="Input.ClientId" class="form-control" asp-items="Model.ClientList">
+                    <option value="">-- Select a Client --</option>
+                </select>
+                <span asp-validation-for="Input.ClientId" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <h4>Add Products</h4>
+    <div class="row align-items-end mb-3">
+        <div class="col-md-5">
+            <label class="form-label">Product</label>
+            <select id="productSelector" class="form-control" asp-items="Model.ProductList">
+                 <option value="">-- Select a Product --</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Quantity</label>
+            <input id="productQuantity" type="number" class="form-control" value="1" min="1" />
+        </div>
+        <div class="col-md-2">
+            <button type="button" id="btnAddProduct" class="btn btn-secondary">Add Item</button>
+        </div>
+    </div>
+
+    <h4>Sale Items</h4>
+    <table class="table" id="saleItemsTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                <td id="subtotal">$0.00</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-end"><strong>Tax (IVA 19%):</strong></td>
+                <td id="tax">$0.00</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                <td id="totalAmount">$0.00</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div id="itemInputsContainer">
+        </div>
+
+    <div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary">Create Sale & Generate PDF</button>
+        <a asp-page="/Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Store product prices 
+        const productPrices = @Html.Raw(Model.ProductPricesJson);
+    
+        $(document).ready(function () {
+            let itemIndex = 0;
+    
+            $("#btnAddProduct").click(function () {
+                const selector = $("#productSelector");
+                const productId = selector.val();
+                const productName = selector.find("option:selected").text();
+                const quantity = parseInt($("#productQuantity").val());
+                const unitPrice = parseFloat(productPrices[productId]);
+    
+                if (!productId || quantity <= 0 || !unitPrice) {
+                    alert("Please select a valid product and quantity.");
+                    return;
+                }
+                
+                // Check if item already exists
+                if ($(`#saleItemsTable tbody tr[data-product-id="${productId}"]`).length > 0) {
+                    alert("Product already in the cart. Please remove it to add a new quantity.");
+                    return;
+                }
+
+                const total = (quantity * unitPrice).toFixed(2);
+
+                // Add visual row to table
+                const newRow = `
+                    <tr data-product-id="${productId}">
+                        <td>${productName}</td>
+                        <td>${quantity}</td>
+                        <td>$${unitPrice.toFixed(2)}</td>
+                        <td>$${total}</td>
+                        <td><button type="button" class="btn btn-sm btn-danger btnRemoveItem">Remove</button></td>
+                    </tr>`;
+                $("#saleItemsTable tbody").append(newRow);
+
+                // Add hidden inputs for the form submission
+                const inputContainer = $("#itemInputsContainer");
+                inputContainer.append(`<input type="hidden" name="Input.Items[${itemIndex}].ProductId" value="${productId}" />`);
+                inputContainer.append(`<input type="hidden" name="Input.Items[${itemIndex}].ProductName" value="${productName}" />`);
+                inputContainer.append(`<input type="hidden" name="Input.Items[${itemIndex}].Quantity" value="${quantity}" />`);
+                inputContainer.append(`<input type="hidden" name="Input.Items[${itemIndex}].UnitPrice" value="${unitPrice}" />`);
+                
+                itemIndex++;
+                updateTotals();
+            });
+    
+            // Remove item from table
+            $("#saleItemsTable").on("click", ".btnRemoveItem", function () {
+                const row = $(this).closest("tr");
+                const productId = row.data("product-id");
+                
+                // Remove hidden inputs
+                $(`#itemInputsContainer input[name$=".ProductId"][value="${productId}"]`).each(function() {
+                    $(this).nextUntil('input[name$=".ProductId"]').remove(); // Remove Qty, Price, Name
+                    $(this).remove(); // Remove ProductId
+                });
+                
+                row.remove();
+                updateTotals();
+            });
+
+            function updateTotals() {
+                let subtotal = 0;
+                $("#saleItemsTable tbody tr").each(function () {
+                    const price = parseFloat($(this).find("td:eq(2)").text().replace("$", ""));
+                    const qty = parseInt($(this).find("td:eq(1)").text());
+                    subtotal += (price * qty);
+                });
+                
+                const tax = subtotal * 0.19; 
+                const total = subtotal + tax;
+
+                $("#subtotal").text(`$${subtotal.toFixed(2)}`);
+                $("#tax").text(`$${tax.toFixed(2)}`);
+                $("#totalAmount").text(`$${total.toFixed(2)}`);
+            }
+        });
+    </script>
+}

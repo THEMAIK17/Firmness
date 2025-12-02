@@ -1,0 +1,109 @@
+
+services:
+  tests:
+    container_name: firmness_tests
+    build:
+      context: .
+      dockerfile: Firmness.Tests/Dockerfile
+  # service for the database
+  db:
+    image: postgres:15-alpine
+    container_name: firmness_db
+    restart: always
+    environment:
+      - POSTGRES_DB=FirmnessDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5435:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  #  Service for the web application
+  web:
+    container_name: firmness_web
+    build:
+      context: .
+      dockerfile: Firmness.Web/Dockerfile
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=FirmnessDB;Username=postgres;Password=${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080" # I can ingress to the app  http://localhost:8080
+    volumes:
+      - ./Firmness.Web/wwwroot/recibos:/app/wwwroot/recibos
+    depends_on:
+      db:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
+    # the service for the Api
+  api:
+    container_name: firmness_api
+    build:
+      context: .
+      dockerfile: Firmness.Api/Dockerfile
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=FirmnessDB;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=FirmnessAPI
+      - Jwt__Audience=FirmnessClient
+      - EmailSettings__Host=${EMAIL_HOST}
+      - EmailSettings__Port=${EMAIL_PORT}
+      - EmailSettings__From=${EMAIL_FROM}
+      - EmailSettings__Password=${EMAIL_PASSWORD}
+    ports:
+      - "5143:8080"
+    volumes:
+      - ./Firmness.Web/wwwroot/recibos:/app/wwwroot/recibos
+    depends_on:
+      db:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
+  # This runs the React application using Nginx.
+  client:
+    container_name: firmness_client
+    build:
+      context: ./client-react
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5173:80" # Access the React app at http://localhost:5173
+    depends_on:
+      api:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
+  # this container is use for shared urls
+  print-urls:
+    image: alpine:latest
+    container_name: urls_display
+    depends_on:
+      - web
+      - api
+      - client
+    command: >
+      sh -c "sleep 5; 
+             echo '----------------------------------------------------------';
+             echo ' PROYECTO FIRMEZA - DESPLIEGUE EXITOSO  ';
+             echo '----------------------------------------------------------';
+             echo ' ';
+             echo ' TIENDA (Cliente):    http://localhost:5173';
+             echo ' API (Swagger):       http://localhost:5143/swagger';
+             echo ' PANEL ADMIN:         http://localhost:8080';
+             echo ' BASE DE DATOS:       localhost:5435';
+             echo ' ';
+             echo '----------------------------------------------------------';
+             echo ' Nota: Si es la primera vez, espera unos segundos a que la BD inicie.';
+             echo '----------------------------------------------------------';"
+volumes:
+  postgres_data:
+  
+  
+ 
