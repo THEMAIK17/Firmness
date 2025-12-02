@@ -2,7 +2,7 @@
 
 ![.NET Version](https://img.shields.io/badge/.NET-8.0-purple) ![React](https://img.shields.io/badge/React-18-blue) ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED) ![Architecture](https://img.shields.io/badge/Architecture-Clean%20DDD-orange)
 
-**Firmeza** is a robust Fullstack solution designed for the comprehensive management of inventory, clients, and sales processes in the construction and machinery rental sector. The system implements a **distributed architecture** that separates business logic (Backend API), administration (Razor Pages), and client experience (Frontend React), all orchestrated via Docker containers.
+**Firmness** is a robust Fullstack solution designed for the comprehensive management of inventory, clients, and sales processes in the construction and machinery rental sector. The system implements a **distributed architecture** that separates business logic (Backend API), administration (Razor Pages), and client experience (Frontend React), all orchestrated via Docker containers.
 
 ---
 
@@ -25,7 +25,7 @@ The project has been built following **Clean Architecture** and **Domain-Driven 
 ### Backend (.NET 8)
 * **Firmeza.API:** Secure RESTful API with JWT authentication.
 * **Firmeza.Web:** Server-side rendered administrative panel (Razor Pages).
-* **Firmeza.Infrastructure:** Persistence implementation with Entity Framework Core and PostgreSQL.
+* **Firmeza.Infraestructure:** Persistence implementation with Entity Framework Core and PostgreSQL.
 * **Firmeza.Application:** Pure business logic, DTOs, Interfaces, and Services (Email, PDF, Excel).
 * **Firmeza.Domain:** Core entities and business rules.
 
@@ -134,7 +134,7 @@ The project includes a test execution pipeline integrated into the deployment.
 * **Deployment Policy:** The test container (`firmness_tests`) acts as a "Quality Gate". If tests fail, the application deployment stops automatically.
 
 ---
-## 🐧 Note for Linux / Mac Users
+##  Note for Linux / Mac Users
 
 If deploying the project in a Linux environment and you wish for PDF files to physically persist in the shared folder, you must grant write permissions to the volume:
 
