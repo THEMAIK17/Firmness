@@ -134,6 +134,16 @@ The project includes a test execution pipeline integrated into the deployment.
 * **Deployment Policy:** The test container (`firmness_tests`) acts as a "Quality Gate". If tests fail, the application deployment stops automatically.
 
 ---
+## 🐧 Note for Linux / Mac Users
+
+If deploying the project in a Linux environment and you wish for PDF files to physically persist in the shared folder, you must grant write permissions to the volume:
+
+```bash
+
+sudo chmod -R 777 Firmness.Web/wwwroot
+
+```
+---
 
 ##  Author
 
