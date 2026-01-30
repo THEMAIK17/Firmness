@@ -125,10 +125,11 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         var userManager = services.GetRequiredService<UserManager<Client>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         
         await context.Database.MigrateAsync();
         
-        await Firmness.Infraestructure.Data.StoreSeeder.SeedAsync(context, userManager);
+        await Firmness.Infraestructure.Data.StoreSeeder.SeedAsync(context, userManager, roleManager);
         
         Console.WriteLine("--> Database migration and seeding completed successfully.");
     }

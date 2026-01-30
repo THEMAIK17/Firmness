@@ -6,8 +6,18 @@ namespace Firmness.Infraestructure.Data;
 
 public static class StoreSeeder
     {
-        public static async Task SeedAsync(ApplicationDbContext context, UserManager<Client> userManager)
+        public static async Task SeedAsync(ApplicationDbContext context, UserManager<Client> userManager, RoleManager<IdentityRole> roleManager)
         {
+            // Seed Roles
+            string[] roleNames = { "Administrator", "Client" };
+            foreach (var roleName in roleNames)
+            {
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+
             // create admin if they don't exist
             var testEmail = "cliente@test.com";
             if (!await userManager.Users.AnyAsync(u => u.Email == testEmail))
