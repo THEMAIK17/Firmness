@@ -13,10 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Debug: Log environment and configuration
-Console.WriteLine($"---> ASPNETCORE_ENVIRONMENT: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
-Console.WriteLine($"---> ConnectionStrings__DefaultConnection ENV: {Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")}");
-Console.WriteLine($"---> ConnectionString from Configuration: {builder.Configuration.GetConnectionString("DefaultConnection")}");
+var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
