@@ -15,7 +15,7 @@ export const RegisterPage = () => {
     });
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
-    
+
     const { register } = useAuth();
     const navigate = useNavigate();
 
@@ -30,18 +30,38 @@ export const RegisterPage = () => {
         e.preventDefault();
         setError('');
         setSuccessMsg('');
-        
+
         const result = await register(formData);
-        
+
         if (result.success) {
             setSuccessMsg('Registro exitoso! Redirigiendo al login...');
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
         } else {
-           
-            const msg = result.message?.response?.data || 'Error al registrarse';
-            setError(JSON.stringify(msg));
+            console.log("Error de registro recibido:", result.message);
+            let errorMessage = 'Error al registrarse';
+
+            // Handle IdentityErrors (Array)
+            if (Array.isArray(result.message)) {
+                errorMessage = result.message.map(err => err.description || err.code).join(' ');
+            }
+            // Handle ValidationErrors (Object with errors property)
+            else if (result.message?.errors) {
+                errorMessage = Object.values(result.message.errors).flat().join(' ');
+            }
+            // Handle plain string or object with title/detail
+            else if (typeof result.message === 'string') {
+                errorMessage = result.message;
+            }
+            else if (result.message?.detail) {
+                errorMessage = result.message.detail;
+            }
+            else if (result.message?.title) {
+                errorMessage = result.message.title;
+            }
+
+            setError(errorMessage);
         }
     };
 
@@ -53,7 +73,7 @@ export const RegisterPage = () => {
                         <h2 className="text-center mb-4">Crear Cuenta</h2>
                         {error && <Alert variant="danger">{error}</Alert>}
                         {successMsg && <Alert variant="success">{successMsg}</Alert>}
-                        
+
                         <Form onSubmit={handleSubmit}>
                             <Row>
                                 <Col md={6}>
