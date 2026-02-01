@@ -80,7 +80,7 @@ public class ClientsController : ControllerBase
         }
 
         var returnDto = _mapper.Map<ClientDto>(user);
-        return CreatedAtAction(nameof(GetClients), new { id = user.Id }, returnDto);
+        return Ok(returnDto);
     }
     // PUT: api/Clients/{id}
     [HttpPut("{id}")]
