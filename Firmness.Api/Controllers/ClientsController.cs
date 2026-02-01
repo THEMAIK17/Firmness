@@ -58,9 +58,6 @@ public class ClientsController : ControllerBase
 
         await _userManager.AddToRoleAsync(user, "Client");
         
-        // TODO: Email sending disabled temporarily due to Render network restrictions
-        // causing 20-30 second delays in registration response
-        /*
         //create the email message
         try 
         {
@@ -81,7 +78,7 @@ public class ClientsController : ControllerBase
         {
             _logger.LogWarning(ex, "Error enviando correo de bienvenida al usuario {Email}", user.Email);
         }
-        */
+
 
 
         var returnDto = _mapper.Map<ClientDto>(user);
