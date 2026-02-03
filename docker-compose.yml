@@ -97,7 +97,7 @@ services:
              echo '----------------------------------------------------------';
              echo ' ';
              echo ' TIENDA (Cliente):    http://localhost:5173';
-             echo ' API (Swagger):       http://localhost:5143/swagger';
+             echo ' API (Swagger):       http://localhost:5143';
              echo ' PANEL ADMIN:         http://localhost:8080';
              echo ' BASE DE DATOS:       localhost:5435';
              echo ' ';

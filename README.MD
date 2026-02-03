@@ -105,7 +105,7 @@ The system starts with pre-loaded data to facilitate immediate testing.
 * *(You can also register a new user from the interface).*
 
 ### 3. API & Documentation
-* **Swagger UI:** [http://localhost:5143/swagger](http://localhost:5143/swagger)
+* **Swagger UI:** [http://localhost:5143](http://localhost:5143)
 * **Database (External):** Port `5435`
 
 ---
