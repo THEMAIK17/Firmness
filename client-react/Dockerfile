@@ -1,6 +1,11 @@
 
 FROM node:18-alpine as build
 WORKDIR /app
+
+# Accept API URL as build argument
+ARG VITE_API_URL=http://localhost:5143/api
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .

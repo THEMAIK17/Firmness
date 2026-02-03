@@ -1,94 +1,311 @@
 ﻿@page
 @model RegisterModel
+
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Crear Cuenta";
+    Layout = null;
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            
-            <div class="form-floating mb-3">
-                <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="John" />
-                <label asp-for="Input.FirstName">First Name</label>
-                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Doe" />
-                <label asp-for="Input.LastName">Last Name</label>
-                <span asp-validation-for="Input.LastName" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.DocumentNumber" class="form-control" aria-required="true" placeholder="12345678" />
-                <label asp-for="Input.DocumentNumber">Document Number</label>
-                <span asp-validation-for="Input.DocumentNumber" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Address" class="form-control" autocomplete="street-address" placeholder="123 Main St" />
-                <label asp-for="Input.Address">Address</label>
-                <span asp-validation-for="Input.Address" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" placeholder="+1 123 456 7890" />
-                <label asp-for="Input.PhoneNumber">Phone Number</label>
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-            </div>
-
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Firmeza Admin</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- Custom Register Styles -->
+    <style>
+        :root {
+            --gradient-primary: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --color-dark: #0f172a;
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .register-container {
+            width: 100%;
+            max-width: 550px;
+        }
+        
+        .register-card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-        </section>
-    </div>
-</div>
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .register-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .register-header i {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.9;
+        }
+        
+        .register-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .register-header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+        }
+        
+        .register-body {
+            padding: 2rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+        .register-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .register-body::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .register-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        
+        .form-floating .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-floating .form-control:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 0.2rem rgba(42, 82, 152, 0.15);
+        }
+        
+        .form-floating label {
+            padding: 1rem;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .btn-register {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 0.875rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 60, 114, 0.3);
+        }
+        
+        .register-links {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .register-links a {
+            color: #2a5298;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .register-links a:hover {
+            color: #1e3c72;
+            text-decoration: underline;
+        }
+        
+        .text-danger {
+            color: #dc2626 !important;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        
+        .validation-summary-errors {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 1.25rem;
+            color: #991b1b;
+            font-size: 0.875rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        @@media (max-width: 576px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .register-container {
+                max-width: 100%;
+            }
+            
+            .register-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <i class="fas fa-user-plus"></i>
+                <h1>Crear Cuenta - Firmeza</h1>
+                <p>Registro de Administrador</p>
+            </div>
+            
+            <div class="register-body">
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+                    
+                    <div class="form-row">
+                        <div class="form-floating">
+                            <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" 
+                                   aria-required="true" placeholder="Juan" />
+                            <label asp-for="Input.FirstName">Nombre</label>
+                            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-floating">
+                            <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" 
+                                   aria-required="true" placeholder="Pérez" />
+                            <label asp-for="Input.LastName">Apellido</label>
+                            <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-floating">
+                            <input asp-for="Input.DocumentNumber" class="form-control" 
+                                   aria-required="true" placeholder="12345678" />
+                            <label asp-for="Input.DocumentNumber">Documento</label>
+                            <span asp-validation-for="Input.DocumentNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-floating">
+                            <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" 
+                                   placeholder="+57 300 123 4567" />
+                            <label asp-for="Input.PhoneNumber">Teléfono</label>
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input asp-for="Input.Address" class="form-control" autocomplete="street-address" 
+                               placeholder="Calle 123 #45-67" />
+                        <label asp-for="Input.Address">Dirección</label>
+                        <span asp-validation-for="Input.Address" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                               aria-required="true" placeholder="nombre@ejemplo.com" />
+                        <label asp-for="Input.Email">Correo Electrónico</label>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" 
+                               aria-required="true" placeholder="contraseña" type="password" />
+                        <label asp-for="Input.Password">Contraseña</label>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" 
+                               aria-required="true" placeholder="contraseña" type="password" />
+                        <label asp-for="Input.ConfirmPassword">Confirmar Contraseña</label>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    
+                    <button id="registerSubmit" type="submit" class="w-100 btn btn-primary btn-register">
+                        <i class="fas fa-user-check me-2"></i>Crear Cuenta
+                    </button>
+                    
+                    <div class="register-links">
+                        <span>¿Ya tienes cuenta?</span>
+                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Iniciar Sesión</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+</body>
+</html>
